@@ -1,0 +1,240 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISO Voice AI - Ultimate Version</title>  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #000000, #2a004f);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #5a1a8a;
+    }
+
+    h1 {
+      font-size: 18px;
+      color: #c084ff;
+    }
+
+    #chat {
+      width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .msg {
+      margin: 6px 0;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 70%;
+      font-size: 14px;
+    }
+
+    .user { background: #7c3aed; margin-left: auto; }
+    .bot { background: #1f1f1f; border: 1px solid #5b21b6; }
+
+    /* ROBOT */
+    #container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .face {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #d8b4fe, #1a0033);
+      box-shadow: 0 0 35px #a855f7;
+      position: relative;
+      animation: float 2.5s infinite ease-in-out;
+      transition: 0.3s;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* HEADPHONES */
+    .headphone {
+      position: absolute;
+      width: 200px;
+      height: 90px;
+      border: 6px solid #a855f7;
+      border-bottom: none;
+      border-radius: 100px 100px 0 0;
+      top: -35px;
+      left: -15px;
+    }
+
+    /* EYES */
+    .eye {
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 65px;
+    }
+
+    .eye.left { left: 50px; }
+    .eye.right { right: 50px; }
+
+    /* blink */
+    .blink { transform: scaleY(0.1); }
+
+    /* MOUTH */
+    .mouth {
+      width: 45px;
+      height: 6px;
+      background: white;
+      border-radius: 10px;
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: 0.2s;
+    }
+
+    .happy .mouth { height: 14px; border-radius: 50px; }
+    .sad .mouth { width: 30px; transform: translateX(-50%) rotate(180deg); }
+    .surprised .mouth { height: 18px; width: 18px; border-radius: 50%; }
+
+    /* INPUT */
+    .input-area {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #5a1a8a;
+      width: 100%;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: black;
+      color: white;
+      border: 1px solid #5b21b6;
+    }
+
+    button {
+      margin-left: 5px;
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+    }
+  </style></head>
+<body><header>
+  <h1>ISO Ultimate AI 🤖</h1>
+  <div>Ruth 👤</div>
+</header><div id="chat"></div><div id="container">
+  <div class="face" id="face">
+    <div class="headphone"></div>
+    <div class="eye left"></div>
+    <div class="eye right"></div>
+    <div class="mouth" id="mouth"></div>
+  </div>
+</div><div class="input-area">
+  <input id="input" placeholder="Talk to ISO..." />
+  <button onclick="send()">Send</button>
+  <button onclick="voice()">🎤</button>
+</div><script>
+const face = document.getElementById("face");
+const mouth = document.getElementById("mouth");
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+
+function setEmotion(type){
+  face.classList.remove("happy","sad","surprised");
+  if(type) face.classList.add(type);
+}
+
+// blinking
+setInterval(()=>{
+  document.querySelectorAll(".eye").forEach(e=>{
+    e.classList.add("blink");
+    setTimeout(()=>e.classList.remove("blink"),150);
+  });
+},3000);
+
+function add(text,type){
+  const d = document.createElement("div");
+  d.className = "msg " + type;
+  d.innerText = text;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function speak(text){
+  const s = new SpeechSynthesisUtterance(text);
+
+  s.onstart = () => mouth.style.height = "18px";
+  s.onend = () => mouth.style.height = "6px";
+
+  speechSynthesis.speak(s);
+}
+
+function detectEmotion(text){
+  text = text.toLowerCase();
+  if(text.includes("happy")) return "happy";
+  if(text.includes("sad")) return "sad";
+  if(text.includes("wow") || text.includes("surprise")) return "surprised";
+  return null;
+}
+
+function send(){
+  const text = input.value;
+  if(!text) return;
+
+  add(text,"user");
+
+  const emotion = detectEmotion(text);
+  setEmotion(emotion);
+
+  const reply = "ISO Ultimate AI 🤖: I am here for you.";
+
+  setTimeout(()=>{
+    add(reply,"bot");
+    speak(reply);
+  },500);
+
+  input.value="";
+}
+
+function voice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return alert("Voice not supported");
+
+  const r = new SR();
+  r.lang = "en-US";
+
+  r.onresult = e => {
+    input.value = e.results[0][0].transcript;
+    send();
+  };
+
+  r.start();
+}
+
+add("Hi Ruth 👋 I am ISO Ultimate AI (All Levels).","bot");
+</script></body>
+</html>
